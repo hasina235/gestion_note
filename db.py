@@ -1,7 +1,7 @@
 import psycopg2
-import streamlit from st
-
-DB_URL = st.secrets["DB_URL"]
+import streamlit as st
 
 def get_connection():
-    return psycopg2.connect(DB_URL)
+    return psycopg2.connect(
+        st.secrets["DB_URL"]
+    )
