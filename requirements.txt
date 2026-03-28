@@ -1,5 +1,4 @@
 streamlit
-psycopg2
 pandas
 plotly
 psycopg2-binary
