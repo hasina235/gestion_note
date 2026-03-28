@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 from db import get_connection
 
-DB_URL = st.secrets["DB_URL"]
-
 # =========================
 # CONFIG
 # =========================
