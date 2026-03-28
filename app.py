@@ -196,8 +196,10 @@ elif menu == "Notes":
 elif menu == "Audit":
     st.header("📊 Audit")
 
+    # Charger données
     df = pd.read_sql("SELECT * FROM audit_note ORDER BY date_op DESC", conn)
 
+    # Statistiques
     stats = pd.read_sql("""
         SELECT
             COUNT(*) FILTER (WHERE operation='INSERT') AS insertions,
@@ -206,37 +208,44 @@ elif menu == "Audit":
         FROM audit_note
     """, conn)
 
+    # Affichage des métriques
     col1, col2, col3 = st.columns(3)
-
     col1.metric("Insertions", stats['insertions'][0])
     col2.metric("Modifications", stats['modifications'][0])
     col3.metric("Suppressions", stats['suppressions'][0])
 
-    # Graphique audit
-    fig = px.pie(
-        values=[
-            stats['insertions'][0],
-            stats['modifications'][0],
-            stats['suppressions'][0]
-        ],
-        names=["Insert", "Update", "Delete"],
-        title="Répartition des opérations"
-    )
+    # Renommer les colonnes AVANT
+    df = df.rename(columns={
+        "id": "ID",
+        "operation": "Opération",
+        "date_op": "Date",
+        "etudiant_id": "ID Étudiant",
+        "matiere_id": "ID Matière",
+        "note_ancien": "Ancienne note",
+        "note_nouv": "Nouvelle note",
+        "utilisateur": "Utilisateur"
+    })
 
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Ligne TOTAL
+    # Ligne TOTAL (avec bons noms)
     summary = {
-        "id": "",
-        "operation": "TOTAL",
-        "date_op": "",
-        "etudiant_id": "",
-        "matiere_id": "",
-        "note_ancien": "",
-        "note_nouv": "",
-        "utilisateur": f"I:{stats['insertions'][0]} U:{stats['modifications'][0]} D:{stats['suppressions'][0]}"
+        "ID": "",
+        "Opération": "",
+        "Date": "",
+        "ID Étudiant": "",
+        "ID Matière": "",
+        "Ancienne note": "",
+        "Nouvelle note": "",
+        "Utilisateur": ""
     }
 
+    #
     df = pd.concat([df, pd.DataFrame([summary])], ignore_index=True)
 
+    # Affichage
     st.dataframe(df, use_container_width=True)
+
+    col3, col4, col5 = st.columns(3)
+
+    col3.metric("Total des Insertion :", stats['insertions'][0])
+    col4.metric("Total des modification :", stats['modifications'][0])
+    col5.metric("Total des Suppression : ", stats['suppressions'][0])
