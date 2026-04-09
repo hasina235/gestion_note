@@ -119,26 +119,26 @@ else:
 # =========================
 # DASHBOARD
 # =========================
-if menu == "Dashboard":
-    st.header("Tableau de bord")
+# if menu == "Dashboard":
+#     st.header("Tableau de bord")
 
-    etu = pd.read_sql("SELECT COUNT(*) as total FROM etudiant", conn)
-    mat = pd.read_sql("SELECT COUNT(*) as total FROM matiere", conn)
-    note = pd.read_sql("SELECT COUNT(*) as total FROM note", conn)
+#     etu = pd.read_sql("SELECT COUNT(*) as total FROM etudiant", conn)
+#     mat = pd.read_sql("SELECT COUNT(*) as total FROM matiere", conn)
+#     note = pd.read_sql("SELECT COUNT(*) as total FROM note", conn)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Étudiants", etu["total"][0])
-    col2.metric("Matières", mat["total"][0])
-    col3.metric("Notes", note["total"][0])
+#     col1, col2, col3 = st.columns(3)
+#     col1.metric("Étudiants", etu["total"][0])
+#     col2.metric("Matières", mat["total"][0])
+#     col3.metric("Notes", note["total"][0])
 
-    df = pd.read_sql("SELECT nom, moyenne FROM etudiant", conn)
-    fig = px.bar(df, x="nom", y="moyenne")
-    st.balloons(fig, use_container_width=True)
+#     df = pd.read_sql("SELECT nom, moyenne FROM etudiant", conn)
+#     fig = px.bar(df, x="nom", y="moyenne")
+#     st.balloons(fig, use_container_width=True)
 
 # =========================
 # ETUDIANTS
 # =========================
-elif menu == "Étudiants":
+if menu == "Étudiants":
     st.header("Gestion des Étudiants")
 
     nom = st.text_input("Nom étudiant")
