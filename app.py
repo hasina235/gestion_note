@@ -20,7 +20,7 @@ conn = get_connection()
 # SUPABASE CONFIG
 # =========================
 SUPABASE_URL = "https://pjkssbogwfbnskuxxljb.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqa3NzYm9nd2ZibnNrdXh4bGpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzA3ODAsImV4cCI6MjA5MDIwNjc4MH0.u5v-H5ASgnWupWadJ6tpGrpqiImDfZ5nAuh5yh-KmUY"
+SUPABASE_KEY = "TA_ANON_KEY_ICI"  # ⚠️ remplace par ta vraie clé
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -47,12 +47,15 @@ if st.session_state.user is None:
                 "password": password
             })
 
-            st.session_state.user = res.user
-            st.success("Connexion réussie")
-            st.rerun()
+            if res.user:
+                st.session_state.user = res.user
+                st.success("Connexion réussie")
+                st.rerun()
+            else:
+                st.error("Email ou mot de passe incorrect")
 
-        except:
-            st.error("Email ou mot de passe incorrect")
+        except Exception as e:
+            st.error(f"Erreur: {str(e)}")
 
     st.stop()
 
@@ -60,10 +63,13 @@ if st.session_state.user is None:
 # ROLE USER
 # =========================
 def get_user_role(user_id):
-    res = supabase.table("profiles").select("role").eq("id", user_id).execute()
-    if res.data:
-        return res.data[0]["role"]
-    return "user"
+    try:
+        res = supabase.table("profiles").select("role").eq("id", user_id).execute()
+        if res.data:
+            return res.data[0]["role"]
+        return "user"
+    except:
+        return "user"
 
 role = get_user_role(st.session_state.user.id)
 
@@ -95,10 +101,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title(" Gestion des Notes")
+st.title("Gestion des Notes")
 
 # =========================
-# MENU DYNAMIQUE
+# MENU SELON ROLE
 # =========================
 if role == "admin":
     menu = st.sidebar.radio("Menu", ["Audit"])
@@ -135,19 +141,17 @@ if menu == "Dashboard":
 elif menu == "Étudiants":
     st.header("Gestion des Étudiants")
 
-    st.subheader("Ajouter un étudiant")
     nom = st.text_input("Nom étudiant")
 
     if st.button("Ajouter étudiant"):
-        if nom.strip() != "":
+        if nom.strip():
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO etudiant(nom) VALUES (%s)", (nom,))
                 conn.commit()
-            st.success("Étudiant ajouté")
+            st.success("Ajouté")
         else:
             st.error("Nom vide")
 
-    st.subheader(" Modifier un étudiant")
     df_etu = pd.read_sql("SELECT * FROM etudiant", conn)
 
     etu_id = st.selectbox("Étudiant", df_etu["id"],
@@ -162,7 +166,6 @@ elif menu == "Étudiants":
             conn.commit()
         st.success("Modifié")
 
-    st.subheader(" Supprimer")
     del_id = st.selectbox("Supprimer", df_etu["id"],
         format_func=lambda x: df_etu.loc[df_etu["id"]==x, "nom"].values[0])
 
@@ -172,7 +175,7 @@ elif menu == "Étudiants":
             conn.commit()
         st.warning("Supprimé")
 
-    st.dataframe(df_etu, use_container_width=True)
+    st.dataframe(df_etu)
 
 # =========================
 # MATIERES
@@ -190,17 +193,6 @@ elif menu == "Matières":
         st.success("Ajoutée")
 
     df_mat = pd.read_sql("SELECT * FROM matiere", conn)
-
-    mat_id = st.selectbox("Matière", df_mat["id"],
-        format_func=lambda x: df_mat.loc[df_mat["id"]==x, "design"].values[0])
-
-    new_design = st.text_input("Nom", value=df_mat.loc[df_mat["id"]==mat_id, "design"].values[0])
-
-    if st.button("Modifier matière"):
-        with conn.cursor() as cur:
-            cur.execute("UPDATE matiere SET design=%s WHERE id=%s", (new_design, mat_id))
-            conn.commit()
-        st.success("Modifiée")
 
     st.dataframe(df_mat)
 
@@ -238,7 +230,7 @@ elif menu == "Notes":
     st.dataframe(df)
 
 # =========================
-# AUDIT (ADMIN ONLY)
+# AUDIT
 # =========================
 elif menu == "Audit":
 
