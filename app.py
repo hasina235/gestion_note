@@ -33,7 +33,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎓 Gestion des Notes")
+st.title(" Gestion des Notes")
 
 menu = st.sidebar.radio("Menu", [
     "Dashboard", "Étudiants", "Matières", "Notes", "Audit"
@@ -43,7 +43,7 @@ menu = st.sidebar.radio("Menu", [
 # DASHBOARD
 # =========================
 if menu == "Dashboard":
-    st.header("📊 Tableau de bord")
+    st.header("Tableau de bord")
 
     etu = pd.read_sql("SELECT COUNT(*) as total FROM etudiant", conn)
     mat = pd.read_sql("SELECT COUNT(*) as total FROM matiere", conn)
@@ -62,10 +62,10 @@ if menu == "Dashboard":
 # ETUDIANTS
 # =========================
 elif menu == "Étudiants":
-    st.header("👨‍🎓 Gestion des Étudiants")
+    st.header("Gestion des Étudiants")
 
     # FORMULAIRE AJOUT
-    st.subheader("➕ Ajouter un étudiant")
+    st.subheader("Ajouter un étudiant")
     nom = st.text_input("Nom étudiant")
 
     if st.button("Ajouter étudiant"):
@@ -78,7 +78,7 @@ elif menu == "Étudiants":
             st.error("Le nom ne peut pas être vide")
 
     # FORMULAIRE MODIFICATION
-    st.subheader("✏️ Modifier un étudiant")
+    st.subheader(" Modifier un étudiant")
     df_etu = pd.read_sql("SELECT * FROM etudiant", conn)
     etu_id = st.selectbox("Sélectionnez un étudiant", options=df_etu["id"], format_func=lambda x: df_etu.loc[df_etu["id"]==x, "nom"].values[0])
     new_nom = st.text_input("Nouveau nom", value=df_etu.loc[df_etu["id"]==etu_id, "nom"].values[0])
@@ -107,10 +107,10 @@ elif menu == "Étudiants":
 # MATIERES
 # =========================
 elif menu == "Matières":
-    st.header("📘 Gestion des Matières")
+    st.header(" Gestion des Matières")
 
     # FORMULAIRE AJOUT
-    st.subheader("➕ Ajouter une matière")
+    st.subheader(" Ajouter une matière")
     design = st.text_input("Nom matière")
     coef = st.number_input("Coefficient", min_value=1.0, step=0.1)
 
@@ -124,7 +124,7 @@ elif menu == "Matières":
             st.error("Le nom de la matière ne peut pas être vide")
 
     # FORMULAIRE MODIFICATION
-    st.subheader("✏️ Modifier une matière")
+    st.subheader(" Modifier une matière")
     df_mat = pd.read_sql("SELECT * FROM matiere", conn)
     mat_id = st.selectbox("Sélectionnez une matière", options=df_mat["id"], format_func=lambda x: df_mat.loc[df_mat["id"]==x, "design"].values[0])
     new_design = st.text_input("Nouveau nom", value=df_mat.loc[df_mat["id"]==mat_id, "design"].values[0])
@@ -147,20 +147,20 @@ elif menu == "Matières":
         st.warning("Matière supprimée")
 
     # TABLEAU
-    st.subheader("📋 Liste des matières")
+    st.subheader(" Liste des matières")
     st.dataframe(df_mat, use_container_width=True)
 
 # =========================
 # NOTES
 # =========================
 elif menu == "Notes":
-    st.header("📝 Gestion des Notes")
+    st.header(" Gestion des Notes")
 
     etu = pd.read_sql("SELECT * FROM etudiant", conn)
     mat = pd.read_sql("SELECT * FROM matiere", conn)
 
     # FORMULAIRE AJOUT
-    st.subheader("➕ Ajouter une note")
+    st.subheader(" Ajouter une note")
 
     etu_id = st.selectbox(
         "Étudiant",
@@ -186,7 +186,7 @@ elif menu == "Notes":
         st.success("Note ajoutée")
 
     # MODIFIER / SUPPRIMER
-    st.subheader("✏️ Modifier / Supprimer")
+    st.subheader(" Modifier / Supprimer")
 
     id_mod = st.number_input("ID note", min_value=1)
     new_note = st.number_input("Nouvelle note", 0.0, 20.0)
@@ -209,7 +209,7 @@ elif menu == "Notes":
         st.warning("Supprimée")
 
     # TABLEAU
-    st.subheader("📋 Liste des notes")
+    st.subheader(" Liste des notes")
 
     df = pd.read_sql("""
         SELECT n.id, e.nom AS Étudiant, m.design AS Matière, n.note
@@ -224,7 +224,7 @@ elif menu == "Notes":
 # AUDIT
 # =========================
 elif menu == "Audit":
-    st.header("📊 Audit")
+    st.header(" Audit")
 
     df = pd.read_sql("SELECT * FROM audit_note ORDER BY date_op DESC", conn)
 
@@ -237,7 +237,7 @@ elif menu == "Audit":
     """, conn)
 
     # TABLEAU
-    st.subheader("📋 Historique")
+    st.subheader(" Historique")
 
     df = df.rename(columns={
         "id": "ID",
@@ -253,7 +253,7 @@ elif menu == "Audit":
     st.dataframe(df, use_container_width=True)
 
     # STATS EN BAS
-    st.subheader("📊 Statistiques")
+    st.subheader(" Statistiques")
 
     col1, col2, col3 = st.columns(3)
 
