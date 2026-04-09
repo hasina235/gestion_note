@@ -76,7 +76,7 @@ role = get_user_role(st.session_state.user.id)
 # =========================
 # SIDEBAR
 # =========================
-st.sidebar.write(f"👤 {st.session_state.user.email} ({role})")
+st.sidebar.write(f"{st.session_state.user.email} ({role})")
 
 if st.sidebar.button("Déconnexion"):
     supabase.auth.sign_out()
@@ -110,7 +110,7 @@ if role == "admin":
     menu = st.sidebar.radio("Menu", ["Audit"])
 elif role == "user":
     menu = st.sidebar.radio("Menu", [
-        "Dashboard", "Étudiants", "Matières", "Notes"
+        "Étudiants", "Matières", "Notes"
     ])
 else:
     st.error("Rôle inconnu")
@@ -238,7 +238,7 @@ elif menu == "Audit":
         st.error("Accès refusé")
         st.stop()
 
-    st.header("📊 Audit")
+    st.header(" Audit")
 
     # =========================
     # TABLE AUDIT
@@ -269,13 +269,13 @@ elif menu == "Audit":
         "note_nouv": "Nouvelle note"
     })
 
-    st.subheader("📋 Historique des actions")
+    st.subheader(" Historique des actions")
     st.dataframe(df, use_container_width=True)
 
     # =========================
     # STATISTIQUES
     # =========================
-    st.subheader("📈 Statistiques")
+    st.subheader(" Statistiques")
 
     stats = pd.read_sql("""
         SELECT
@@ -294,7 +294,7 @@ elif menu == "Audit":
     # =========================
     # STATS PAR UTILISATEUR
     # =========================
-    st.subheader("👤 Activité par utilisateur")
+    st.subheader("Activité par utilisateur")
 
     user_stats = pd.read_sql("""
         SELECT utilisateur, COUNT(*) as total_actions
