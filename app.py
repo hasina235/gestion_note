@@ -71,7 +71,7 @@ def get_user_role(user_id):
     except:
         return "user"
 
-role = get_user_role(st.session_state.user.id)
+role, username = get_user_role(st.session_state.user.id)
 
 # =========================
 # SIDEBAR
@@ -129,7 +129,14 @@ if menu == "Étudiants":
         if nom.strip():
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO etudiant(nom) VALUES (%s)", (nom,))
-                conn.commit()
+
+                # AUDIT avec utilisateur connecté
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("INSERT", username))
+
+            conn.commit()
             st.success("Ajouté")
         else:
             st.error("Nom vide")
@@ -145,6 +152,12 @@ if menu == "Étudiants":
     if st.button("Modifier étudiant"):
         with conn.cursor() as cur:
             cur.execute("UPDATE etudiant SET nom=%s WHERE id=%s", (new_nom, etu_id))
+
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("UPDATE", username))
+
             conn.commit()
         st.success("Modifié")
 
@@ -154,6 +167,11 @@ if menu == "Étudiants":
     if st.button("Supprimer étudiant"):
         with conn.cursor() as cur:
             cur.execute("DELETE FROM etudiant WHERE id=%s", (del_id,))
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("DELETE", username))
+
             conn.commit()
         st.warning("Supprimé")
 
@@ -171,6 +189,12 @@ elif menu == "Matières":
     if st.button("Ajouter matière"):
         with conn.cursor() as cur:
             cur.execute("INSERT INTO matiere(design, coef) VALUES (%s, %s)", (design, coef))
+
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("INSERT", username))
+
             conn.commit()
         st.success("Ajoutée")
 
@@ -199,6 +223,12 @@ elif menu == "Notes":
         with conn.cursor() as cur:
             cur.execute("INSERT INTO note(etudiant_id, matiere_id, note) VALUES (%s,%s,%s)",
                         (etu_id, mat_id, note))
+            
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("INSERT", username))
+
             conn.commit()
         st.success("Ajoutée")
 
