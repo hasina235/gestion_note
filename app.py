@@ -132,12 +132,12 @@ if menu == "Étudiants":
                 cur.execute("INSERT INTO etudiant(nom) VALUES (%s)", (nom,))
 
                 # AUDIT avec utilisateur connecté
-            cur.execute("""
-                INSERT INTO audit_note(operation, utilisateur, date_op)
-                VALUES (%s, %s, NOW())
-            """, ("INSERT", username))
+                cur.execute("""
+                    INSERT INTO audit_note(operation, utilisateur, date_op)
+                    VALUES (%s, %s, NOW())
+                """, ("INSERT", username))
 
-            conn.commit()
+                conn.commit()
             st.success("Ajouté")
         else:
             st.error("Nom vide")
