@@ -184,23 +184,68 @@ if menu == "Étudiants":
 elif menu == "Matières":
     st.header("Gestion des Matières")
 
+    # --- Ajouter matière ---
     design = st.text_input("Nom matière")
-    coef = st.number_input("Coefficient", min_value=1.0)
+    coef = st.number_input("Coefficient", min_value=1.0, value=1.0)
 
     if st.button("Ajouter matière"):
+        if design.strip():
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO matiere(design, coef) VALUES (%s, %s)", (design, coef))
+
+                # AUDIT avec utilisateur connecté
+                cur.execute("""
+                    INSERT INTO audit_note(operation, utilisateur, date_op)
+                    VALUES (%s, %s, NOW())
+                """, ("INSERT", username))
+
+                conn.commit()
+            st.success("Ajoutée")
+        else:
+            st.error("Nom vide")
+
+    # --- Lire les matières ---
+    df_mat = pd.read_sql("SELECT * FROM matiere", conn)
+
+    # --- Modifier matière ---
+    mat_id = st.selectbox("Matière à modifier", df_mat["id"],
+        format_func=lambda x: f"{df_mat.loc[df_mat['id']==x, 'design'].values[0]} (Coef: {df_mat.loc[df_mat['id']==x, 'coef'].values[0]})"
+    )
+    new_design = st.text_input("Nouveau nom",
+        value=df_mat.loc[df_mat["id"]==mat_id, "design"].values[0])
+    new_coef = st.number_input("Nouveau coefficient",
+        min_value=1.0,
+        value=float(df_mat.loc[df_mat["id"]==mat_id, "coef"].values[0])
+    )
+
+    if st.button("Modifier matière"):
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO matiere(design, coef) VALUES (%s, %s)", (design, coef))
+            cur.execute("UPDATE matiere SET design=%s, coef=%s WHERE id=%s", (new_design, new_coef, mat_id))
 
             cur.execute("""
                 INSERT INTO audit_note(operation, utilisateur, date_op)
                 VALUES (%s, %s, NOW())
-            """, ("INSERT", username))
+            """, ("UPDATE", username))
 
             conn.commit()
-        st.success("Ajoutée")
+        st.success("Modifiée")
 
-    df_mat = pd.read_sql("SELECT * FROM matiere", conn)
+    # --- Supprimer matière ---
+    del_id = st.selectbox("Supprimer matière", df_mat["id"],
+        format_func=lambda x: f"{df_mat.loc[df_mat['id']==x, 'design'].values[0]} (Coef: {df_mat.loc[df_mat['id']==x, 'coef'].values[0]})"
+    )
+    if st.button("Supprimer matière"):
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM matiere WHERE id=%s", (del_id,))
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("DELETE", username))
 
+            conn.commit()
+        st.warning("Supprimée")
+
+    # --- Afficher toutes les matières ---
     st.dataframe(df_mat)
 
 # =========================
@@ -209,38 +254,77 @@ elif menu == "Matières":
 elif menu == "Notes":
     st.header("Gestion des Notes")
 
-    etu = pd.read_sql("SELECT * FROM etudiant", conn)
-    mat = pd.read_sql("SELECT * FROM matiere", conn)
+    # --- Récupérer étudiants et matières ---
+    df_etu = pd.read_sql("SELECT * FROM etudiant", conn)
+    df_mat = pd.read_sql("SELECT * FROM matiere", conn)
 
-    etu_id = st.selectbox("Étudiant", etu["id"],
-        format_func=lambda x: etu.loc[etu["id"]==x, "nom"].values[0])
-
-    mat_id = st.selectbox("Matière", mat["id"],
-        format_func=lambda x: mat.loc[mat["id"]==x, "design"].values[0])
-
-    note = st.number_input("Note", 0.0, 20.0)
+    # --- Ajouter une note ---
+    st.subheader("Ajouter note")
+    etu_id = st.selectbox("Étudiant", df_etu["id"],
+        format_func=lambda x: df_etu.loc[df_etu["id"]==x, "nom"].values[0])
+    mat_id = st.selectbox("Matière", df_mat["id"],
+        format_func=lambda x: df_mat.loc[df_mat["id"]==x, "design"].values[0])
+    note_val = st.number_input("Note", min_value=0.0, max_value=20.0, value=0.0)
 
     if st.button("Ajouter note"):
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO note(etudiant_id, matiere_id, note) VALUES (%s,%s,%s)",
-                        (etu_id, mat_id, note))
-            
+            cur.execute(
+                "INSERT INTO note(etudiant_id, matiere_id, note) VALUES (%s,%s,%s)",
+                (etu_id, mat_id, note_val)
+            )
             cur.execute("""
                 INSERT INTO audit_note(operation, utilisateur, date_op)
                 VALUES (%s, %s, NOW())
             """, ("INSERT", username))
-
             conn.commit()
         st.success("Ajoutée")
 
-    df = pd.read_sql("""
+    # --- Lire les notes ---
+    df_note = pd.read_sql("""
         SELECT n.id, e.nom, m.design, n.note
         FROM note n
         JOIN etudiant e ON e.id=n.etudiant_id
         JOIN matiere m ON m.id=n.matiere_id
     """, conn)
 
-    st.dataframe(df)
+    # --- Modifier note ---
+    st.subheader("Modifier note")
+    note_id = st.selectbox("Sélectionnez une note", df_note["id"],
+        format_func=lambda x: f"{df_note.loc[df_note['id']==x, 'nom'].values[0]} - {df_note.loc[df_note['id']==x, 'design'].values[0]} : {df_note.loc[df_note['id']==x, 'note'].values[0]}"
+    )
+    new_note = st.number_input(
+        "Nouvelle note",
+        min_value=0.0,
+        max_value=20.0,
+        value=float(df_note.loc[df_note["id"]==note_id, "note"].values[0])
+    )
+
+    if st.button("Modifier note"):
+        with conn.cursor() as cur:
+            cur.execute("UPDATE note SET note=%s WHERE id=%s", (new_note, note_id))
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("UPDATE", username))
+            conn.commit()
+        st.success("Modifiée")
+
+    # --- Supprimer note ---
+    del_id = st.selectbox("Supprimer note", df_note["id"],
+        format_func=lambda x: f"{df_note.loc[df_note['id']==x, 'nom'].values[0]} - {df_note.loc[df_note['id']==x, 'design'].values[0]} : {df_note.loc[df_note['id']==x, 'note'].values[0]}"
+    )
+    if st.button("Supprimer note"):
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM note WHERE id=%s", (del_id,))
+            cur.execute("""
+                INSERT INTO audit_note(operation, utilisateur, date_op)
+                VALUES (%s, %s, NOW())
+            """, ("DELETE", username))
+            conn.commit()
+        st.warning("Supprimée")
+
+    # --- Afficher toutes les notes ---
+    st.dataframe(df_note)
 
 # =========================
 # AUDIT
