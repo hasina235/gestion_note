@@ -71,7 +71,8 @@ def get_user_role(user_id):
     except:
         return "user"
 
-role, username = get_user_role(st.session_state.user.id)
+role = get_user_role(st.session_state.user.id)
+username = get_user_role(st.session_state.user.id)
 
 # =========================
 # SIDEBAR
