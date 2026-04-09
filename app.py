@@ -20,7 +20,7 @@ conn = get_connection()
 # SUPABASE CONFIG
 # =========================
 SUPABASE_URL = "https://pjkssbogwfbnskuxxljb.supabase.co"
-SUPABASE_KEY = "TA_ANON_KEY_ICI"  # ⚠️ remplace par ta vraie clé
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqa3NzYm9nd2ZibnNrdXh4bGpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzA3ODAsImV4cCI6MjA5MDIwNjc4MH0.u5v-H5ASgnWupWadJ6tpGrpqiImDfZ5nAuh5yh-KmUY"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
