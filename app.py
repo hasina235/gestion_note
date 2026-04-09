@@ -102,10 +102,13 @@ st.title(" Gestion des Notes")
 # =========================
 if role == "admin":
     menu = st.sidebar.radio("Menu", ["Audit"])
-else:
+elif role == "user":
     menu = st.sidebar.radio("Menu", [
         "Dashboard", "Étudiants", "Matières", "Notes"
     ])
+else:
+    st.error("Rôle inconnu")
+    st.stop()
 
 # =========================
 # DASHBOARD
