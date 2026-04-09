@@ -238,7 +238,69 @@ elif menu == "Audit":
         st.error("Accès refusé")
         st.stop()
 
-    st.header("Audit")
+    st.header("📊 Audit")
 
-    df = pd.read_sql("SELECT * FROM audit_note ORDER BY date_op DESC", conn)
-    st.dataframe(df)
+    # =========================
+    # TABLE AUDIT
+    # =========================
+    df = pd.read_sql("""
+        SELECT 
+            id,
+            operation,
+            date_op,
+            utilisateur,
+            etudiant_id,
+            matiere_id,
+            note_ancien,
+            note_nouv
+        FROM audit_note
+        ORDER BY date_op DESC
+    """, conn)
+
+    # Renommer colonnes (plus lisible)
+    df = df.rename(columns={
+        "id": "ID",
+        "operation": "Opération",
+        "date_op": "Date",
+        "utilisateur": "Utilisateur",
+        "etudiant_id": "ID Étudiant",
+        "matiere_id": "ID Matière",
+        "note_ancien": "Ancienne note",
+        "note_nouv": "Nouvelle note"
+    })
+
+    st.subheader("📋 Historique des actions")
+    st.dataframe(df, use_container_width=True)
+
+    # =========================
+    # STATISTIQUES
+    # =========================
+    st.subheader("📈 Statistiques")
+
+    stats = pd.read_sql("""
+        SELECT
+            COUNT(*) FILTER (WHERE operation='INSERT') AS insertions,
+            COUNT(*) FILTER (WHERE operation='UPDATE') AS modifications,
+            COUNT(*) FILTER (WHERE operation='DELETE') AS suppressions
+        FROM audit_note
+    """, conn)
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.success(f"Ajouts : {stats['insertions'][0]}")
+    col2.info(f"Modifications : {stats['modifications'][0]}")
+    col3.error(f"Suppressions : {stats['suppressions'][0]}")
+
+    # =========================
+    # STATS PAR UTILISATEUR
+    # =========================
+    st.subheader("👤 Activité par utilisateur")
+
+    user_stats = pd.read_sql("""
+        SELECT utilisateur, COUNT(*) as total_actions
+        FROM audit_note
+        GROUP BY utilisateur
+        ORDER BY total_actions DESC
+    """, conn)
+
+    st.dataframe(user_stats, use_container_width=True)
