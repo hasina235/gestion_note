@@ -90,7 +90,7 @@ elif menu == "Étudiants":
         st.success("Étudiant modifié")
 
     # FORMULAIRE SUPPRESSION
-    st.subheader("🗑 Supprimer un étudiant")
+    st.subheader(" Supprimer un étudiant")
     del_id = st.selectbox("Étudiant à supprimer", options=df_etu["id"], format_func=lambda x: df_etu.loc[df_etu["id"]==x, "nom"].values[0])
 
     if st.button("Supprimer étudiant"):
@@ -100,7 +100,7 @@ elif menu == "Étudiants":
         st.warning("Étudiant supprimé")
 
     # TABLEAU
-    st.subheader("📋 Liste des étudiants")
+    st.subheader(" Liste des étudiants")
     st.dataframe(df_etu, use_container_width=True)
 
 # =========================
@@ -137,7 +137,7 @@ elif menu == "Matières":
         st.success("Matière modifiée")
 
     # FORMULAIRE SUPPRESSION
-    st.subheader("🗑 Supprimer une matière")
+    st.subheader("Supprimer une matière")
     del_mat_id = st.selectbox("Matière à supprimer", options=df_mat["id"], format_func=lambda x: df_mat.loc[df_mat["id"]==x, "design"].values[0])
 
     if st.button("Supprimer matière"):
