@@ -133,7 +133,7 @@ if menu == "Dashboard":
 
     df = pd.read_sql("SELECT nom, moyenne FROM etudiant", conn)
     fig = px.bar(df, x="nom", y="moyenne")
-    st.plotly_chart(fig, use_container_width=True)
+    st.balloons(fig, use_container_width=True)
 
 # =========================
 # ETUDIANTS
