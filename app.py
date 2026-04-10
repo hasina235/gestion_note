@@ -244,7 +244,6 @@ elif menu == "Matières":
 
             conn.commit()
         st.warning("Supprimée")
-        st.rerun()
 
     # --- Afficher toutes les matières ---
     st.dataframe(df_mat)
