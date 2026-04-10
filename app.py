@@ -139,7 +139,6 @@ if menu == "Étudiants":
 
                 conn.commit()
             st.success("Ajouté")
-            st.experimental_rerun()
         else:
             st.error("Nom vide")
 
@@ -162,7 +161,6 @@ if menu == "Étudiants":
 
             conn.commit()
         st.success("Modifié")
-        st.experimental_rerun()
 
     del_id = st.selectbox("Supprimer", df_etu["id"],
         format_func=lambda x: df_etu.loc[df_etu["id"]==x, "nom"].values[0])
@@ -177,7 +175,6 @@ if menu == "Étudiants":
 
             conn.commit()
         st.warning("Supprimé")
-        st.experimental_rerun()
 
     st.dataframe(df_etu)
 
@@ -204,7 +201,6 @@ elif menu == "Matières":
 
                 conn.commit()
             st.success("Ajoutée")
-            st.experimental_rerun()
         else:
             st.error("Nom vide")
 
@@ -233,7 +229,6 @@ elif menu == "Matières":
 
             conn.commit()
         st.success("Modifiée")
-        st.experimental_rerun()
 
     # --- Supprimer matière ---
     del_id = st.selectbox("Supprimer matière", df_mat["id"],
@@ -284,7 +279,6 @@ elif menu == "Notes":
             """, ("INSERT", username))
             conn.commit()
         st.success("Ajoutée")
-        st.experimental_rerun()
 
     # --- Lire les notes ---
     df_note = pd.read_sql("""
@@ -315,7 +309,6 @@ elif menu == "Notes":
             """, ("UPDATE", username))
             conn.commit()
         st.success("Modifiée")
-        st.experimental_rerun()
 
     # --- Supprimer note ---
     del_id = st.selectbox("Supprimer note", df_note["id"],
@@ -330,7 +323,6 @@ elif menu == "Notes":
             """, ("DELETE", username))
             conn.commit()
         st.warning("Supprimée")
-        st.experimental_rerun()
 
     # --- Afficher toutes les notes ---
     st.dataframe(df_note)
