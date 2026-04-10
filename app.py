@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from db import get_connection
 from supabase import create_client
+import psycopg2
 
 # =========================
 # CONFIG
@@ -235,15 +236,21 @@ elif menu == "Matières":
         format_func=lambda x: f"{df_mat.loc[df_mat['id']==x, 'design'].values[0]} (Coef: {df_mat.loc[df_mat['id']==x, 'coef'].values[0]})"
     )
     if st.button("Supprimer matière"):
-        with conn.cursor() as cur:
-            cur.execute("DELETE FROM matiere WHERE id=%s", (del_id,))
-            cur.execute("""
-                INSERT INTO audit_note(operation, utilisateur, date_op)
-                VALUES (%s, %s, NOW())
-            """, ("DELETE", username))
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM matiere WHERE id=%s", (del_id,))
+                cur.execute("""
+                    INSERT INTO audit_note(operation, utilisateur, date_op)
+                    VALUES (%s, %s, NOW())
+                """, ("DELETE", username))
 
-            conn.commit()
-        st.warning("Supprimée")
+                conn.commit()
+            st.warning("Supprimée")
+            st.rerun()
+
+        except psycopg2.errors.ForeignKeyViolation:
+            conn.rollback()
+        st.error("❌ Impossible de supprimer : cette matière est déjà utilisée (notes, classes, etc.)")
 
     # --- Afficher toutes les matières ---
     st.dataframe(df_mat)
